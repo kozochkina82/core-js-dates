@@ -305,9 +305,30 @@ function getQuarter(date) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  function formDate(date) {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+  const [day, month, year] = period.start.split('-').map(Number);
+  const currentDate = new Date(year, month - 1, day);
+
+  const [endDay, endMonth, endYear] = period.end.split('-').map(Number);
+  const endDate = new Date(endYear, endMonth - 1, endDay);
+  const schedule = [];
+  while (currentDate <= endDate) {
+    for (let i = 0; i < countWorkDays && currentDate <= endDate; i += 1) {
+      schedule.push(formDate(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    currentDate.setDate(currentDate.getDate() + countOffDays);
+  }
+  return schedule;
 }
+
+// '01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024'
 
 /**
  * Determines whether the year in the provided date is a leap year.
@@ -321,8 +342,9 @@ function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
  * Date(2022, 2, 1) => false
  * Date(2020, 2, 1) => true
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  const year = date.getFullYear();
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
 module.exports = {
